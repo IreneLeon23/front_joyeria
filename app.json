@@ -6,7 +6,11 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -29,6 +33,9 @@
       "eas": {
         "projectId": "4dafb71e-e8e3-4fc2-9c62-f3dceeb66b95"
       }
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
