@@ -66,7 +66,7 @@ const TrabajadorCard = ({ trabajador, navigation, onDelete }) => {
     const handleDownload = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.1.67:3000/estadisticas/trabajador/${trabajador.id}`, {
+            const response = await fetch(`https://prestamos-back-production.up.railway.app/estadisticas/trabajador/${trabajador.id}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
