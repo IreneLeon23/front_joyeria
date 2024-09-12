@@ -78,21 +78,21 @@ const ClienteDetails = ({ route }) => {
                 return;
             }
 
-            const clienteResponse = await axios.get(`http://192.168.1.17:3000/clientes/${id}`, {
+            const clienteResponse = await axios.get(`https://prestamos-back-production.up.railway.app/clientes/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
             setCliente(clienteResponse.data);
 
-            const abonosResponse = await axios.get(`http://192.168.1.17:3000/clientes/${id}/abonos`, {
+            const abonosResponse = await axios.get(`https://prestamos-back-production.up.railway.app/clientes/${id}/abonos`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
             setAbonos(abonosResponse.data);
 
-            const multasResponse = await axios.get(`http://192.168.1.17:3000/clientes/${id}/multas`, {
+            const multasResponse = await axios.get(`https://prestamos-back-production.up.railway.app/clientes/${id}/multas`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -256,7 +256,7 @@ const ClienteDetails = ({ route }) => {
                 fecha_termino: formattedFechaTermino // Nueva fecha de término
             };
     
-            await axios.put(`http://192.168.1.17:3000/clientes/${id}`, updatedClient, {
+            await axios.put(`https://prestamos-back-production.up.railway.app/clientes/${id}`, updatedClient, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

@@ -60,7 +60,7 @@ const NuevoCliente = ({ navigation }) => {
         const formattedFechaInicio = fechaInicio.toISOString().split('T')[0];
         const formattedFechaTermino = newFechaTermino.toISOString().split('T')[0];
         try {
-            await axios.post('http://192.168.1.17:3000/clientes', {
+            await axios.post('https://prestamos-back-production.up.railway.app/clientes', {
                 nombre,
                 ocupacion,
                 direccion,

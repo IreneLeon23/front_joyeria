@@ -21,7 +21,7 @@
 
                 const fecha = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
 
-                const response = await axios.post(`http://192.168.1.17:3000/clientes/${clienteId}/abonos`, { monto: parseFloat(monto), fecha }, {
+                const response = await axios.post(`https://prestamos-back-production.up.railway.app/clientes/${clienteId}/abonos`, { monto: parseFloat(monto), fecha }, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

@@ -41,7 +41,7 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 const decodedToken = decodeToken(token);
                 setIsAdmin(decodedToken.role === 'admin');
 
-                const response = await axios.get(`http://192.168.1.17:3000/trabajadores/${id}/clientes`, {
+                const response = await axios.get(`https://prestamos-back-production.up.railway.app/trabajadores/${id}/clientes`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -100,7 +100,7 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 throw new Error('No se encontró el token');
             }
 
-            await axios.delete(`http://192.168.1.17:3000/clientes/${clienteId}`, {
+            await axios.delete(`https://prestamos-back-production.up.railway.app/clientes/${clienteId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -131,7 +131,7 @@ const TrabajadorClientes = ({ route, navigation }) => {
             }
     
             // Obtener datos del cliente
-            const response = await axios.get(`http://192.168.1.17:3000/estadisticas/cliente/${cliente.id}`, {
+            const response = await axios.get(`https://prestamos-back-production.up.railway.app/estadisticas/cliente/${cliente.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
     

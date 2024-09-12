@@ -29,7 +29,7 @@ const LoginScreen = ({ navigation }) => {
     const handleLogin = async () => {
         try {
             console.log('Iniciando sesión con:', { email, password });
-            const response = await axios.post('http://192.168.1.17:3000/login', { email, password });
+            const response = await axios.post('https://prestamos-back-production.up.railway.app/login', { email, password });
             const { token } = response.data;
             console.log('Token recibido:', token);
 

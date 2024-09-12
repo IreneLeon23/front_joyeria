@@ -20,7 +20,7 @@ const WorkerDashboard = ({ navigation }) => {
                     return;
                 }
 
-                const response = await axios.get('http://192.168.1.17:3000/clientes', {
+                const response = await axios.get('https://prestamos-back-production.up.railway.app/clientes', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

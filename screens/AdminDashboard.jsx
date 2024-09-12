@@ -16,7 +16,7 @@ const AdminDashboard = ({ navigation }) => {
                 throw new Error('Token no encontrado');
             }
 
-            const response = await axios.get('http://192.168.1.17:3000/trabajadores', {
+            const response = await axios.get('https://prestamos-back-production.up.railway.app/trabajadores', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
