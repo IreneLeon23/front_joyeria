@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, Text, TextInput, StyleSheet, ScrollView, Button } from 'react-native';
+import { View, FlatList, Text, TextInput, StyleSheet } from 'react-native';
 import axios from 'axios';
 import ClienteCard from '../components/ClienteCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -199,7 +199,7 @@ const TrabajadorClientes = ({ route, navigation }) => {
     
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <View contentContainerStyle={styles.container} style={styles.container}>
             <Text style={styles.title}>Lista de clientes</Text>
             <TextInput
                 style={styles.searchInput}
@@ -211,15 +211,18 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 data={filteredClientes}
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => (
-                    <ClienteCard 
-                        cliente={item} 
-                        onPress={() => navigation.navigate('ClienteDetails', { id: item.id })} 
-                        isAdmin={isAdmin} 
-                        onEdit={() => handleEdit(item)}
-                        onDelete={handleDelete}
-                        onExport={() => handleExport(item)}
-                    />
+                    <>
+                        <ClienteCard 
+                            cliente={item} 
+                            onPress={() => navigation.navigate('ClienteDetails', { id: item.id })} 
+                            isAdmin={isAdmin} 
+                            onEdit={() => handleEdit(item)}
+                            onDelete={handleDelete}
+                            onExport={() => handleExport(item)}
+                        />
+                    </>
                 )}
+                style={{ paddingLeft: "4%", paddingRight: "4%" }}
             />
             {clienteSeleccionado && (
                 <EditarClientes
@@ -237,7 +240,7 @@ const TrabajadorClientes = ({ route, navigation }) => {
                     onEliminar={handleEliminar}
                 />
             )}
-        </ScrollView>
+        </View>
     );
 };
 
@@ -252,6 +255,7 @@ const styles = StyleSheet.create({
         color: '#fff', // Texto blanco
         marginBottom: 20,
         textAlign: 'center',
+        fontWeight: "bold"
     },
     searchInput: {
         backgroundColor: '#fff', // Fondo del input oscuro

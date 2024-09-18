@@ -74,8 +74,8 @@ const EstadisticasScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
+    container: { flex: 1, padding: 16, backgroundColor: '#1e1e1e' },
+    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center', color: "white" },
     card: { backgroundColor: '#f8f9fa', borderRadius: 8, padding: 16, marginVertical: 8 },
     cardTitle: { fontSize: 18, fontWeight: 'bold' },
     cardValue: { fontSize: 16 },

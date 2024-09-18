@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 const EditarTrabajador = ({ worker, onSave, onClose }) => {
@@ -73,7 +73,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro y transparente
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro y transparente,
+        width: "100%"
     },
     formContainer: {
         width: '90%',

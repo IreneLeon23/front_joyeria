@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
@@ -36,7 +36,7 @@ const EstadisticasGraficas = () => {
                 setTrabajadorEstadisticas(trabajadorResponse.data);
                 setLoading(false);
             } catch (error) {
-                setError(error);
+                setError(error.message || 'Error al cargar estadísticas');
                 setLoading(false);
             }
         };
@@ -44,14 +44,32 @@ const EstadisticasGraficas = () => {
         fetchEstadisticas();
     }, []);
 
-    if (!estadisticas || !trabajadorEstadisticas) {
+    if (loading) {
         return (
-            <View>
-                <Text>No se pudieron cargar las estadísticas</Text>
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text>Cargando estadísticas...</Text>
             </View>
         );
     }
-    
+
+    // if (!estadisticas || !trabajadorEstadisticas) {
+    //     return (
+    //         <View>
+    //             <Text>No se pudieron cargar las estadísticas</Text>
+    //         </View>
+    //     );
+    // }
+
+    if (error) {
+        return (
+            <View style={styles.errorContainer}>
+                <Text>No se pudieron cargar las estadísticas</Text>
+                {error && <Text>{error}</Text>}
+            </View>
+        );
+    }
+
 
     const totalPrestamosActivos = estadisticas ? estadisticas.filter(item => item.estado === 'pendiente').length : 0;
     const totalPrestamosCompletados = estadisticas ? estadisticas.filter(item => item.estado === 'completado').length : 0;
@@ -69,8 +87,6 @@ const EstadisticasGraficas = () => {
         datasets: [{ data: [] }]
     };
     
-    
-
     const pieData = [
         {
             name: 'pendiente',
@@ -102,43 +118,45 @@ const EstadisticasGraficas = () => {
         ],
         legend: ['Monto Inicial'],
     };
-    
+
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.chartTitle}>Gráfico de Barras</Text>
-            <BarChart
-                data={barData}
-                width={screenWidth - 20}
-                height={300}
-                yAxisLabel="$"
-                chartConfig={chartConfig}
-                style={styles.chart}
-            />
+        <View style={styles.container}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <Text style={styles.chartTitle}>Gráfico de Barras</Text>
+                <BarChart
+                    data={barData}
+                    width={screenWidth - 20}
+                    height={300}
+                    yAxisLabel="$"
+                    chartConfig={chartConfig}
+                    style={styles.chart}
+                />
 
-            <Text style={styles.chartTitle}>Gráfico de Pastel</Text>
-            <PieChart
-                data={pieData}
-                width={screenWidth - 20}
-                height={300}
-                chartConfig={chartConfig}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="15"
-                absolute
-                style={styles.chart}
-            />
+                <Text style={styles.chartTitle}>Gráfico de Pastel</Text>
+                <PieChart
+                    data={pieData}
+                    width={screenWidth - 10}
+                    height={300}
+                    chartConfig={chartConfig}
+                    accessor="population"
+                    backgroundColor="transparent"
+                    paddingLeft="20"
+                    absolute
+                    style={styles.chart}
+                />
 
-            <Text style={styles.chartTitle}>Gráfico de Tendencia</Text>
-            <LineChart
-                data={lineData}
-                width={screenWidth - 20}
-                height={300}
-                yAxisLabel="$"
-                chartConfig={chartConfig}
-                style={styles.chart}
-            />
-        </ScrollView>
+                <Text style={styles.chartTitle}>Gráfico de Tendencia</Text>
+                <LineChart
+                    data={lineData}
+                    width={screenWidth - 30}
+                    height={300}
+                    yAxisLabel="$"
+                    chartConfig={chartConfig}
+                    style={styles.chart}
+                />
+            </ScrollView>
+        </View>
     );
 };
 
@@ -166,7 +184,17 @@ const styles = StyleSheet.create({
     },
     chart: {
         marginVertical: 8,
-        borderRadius: 16
+        borderRadius: 16,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 

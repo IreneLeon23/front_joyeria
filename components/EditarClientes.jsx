@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const EditarClientes = ({ cliente, visible, onClose, onGuardar }) => {
     const [nombre, setNombre] = useState('');
@@ -78,96 +79,98 @@ const EditarClientes = ({ cliente, visible, onClose, onGuardar }) => {
             onRequestClose={onClose}
         >
             <View style={styles.container}>
-                <View style={styles.formContainer}>
-                    <Text style={styles.header}>Editar Cliente</Text>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Nombre:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={nombre}
-                            onChangeText={setNombre}
-                        />
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                    <View style={styles.formContainer}>
+                        <Text style={styles.header}>Editar Cliente</Text>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Nombre:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={nombre}
+                                onChangeText={setNombre}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Ocupación:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={ocupacion}
+                                onChangeText={setOcupacion}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Dirección:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={direccion}
+                                onChangeText={setDireccion}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Teléfono:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={telefono}
+                                onChangeText={setTelefono}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Fecha Inicio:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={fechaInicio}
+                                onChangeText={setFechaInicio}
+                                placeholder="YYYY-MM-DD"
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Fecha Término:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={fechaTermino}
+                                onChangeText={setFechaTermino}
+                                placeholder="YYYY-MM-DD"
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Monto Inicial:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={montoInicial}
+                                onChangeText={setMontoInicial}
+                                keyboardType="numeric"
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Monto Actual:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={montoActual}
+                                onChangeText={setMontoActual}
+                                keyboardType="numeric"
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Estado:</Text>
+                            <DropDownPicker
+                                open={open}
+                                value={estado}
+                                items={items}
+                                setOpen={setOpen}
+                                setValue={setEstado}
+                                setItems={setItems}
+                                style={styles.dropdown}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                        </View>
+                        <TouchableOpacity style={styles.saveButton} onPress={handleGuardar}>
+                            <Text style={styles.saveButtonText}>Guardar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                            <Text style={styles.cancelButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
                     </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Ocupación:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={ocupacion}
-                            onChangeText={setOcupacion}
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Dirección:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={direccion}
-                            onChangeText={setDireccion}
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Teléfono:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={telefono}
-                            onChangeText={setTelefono}
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Fecha Inicio:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={fechaInicio}
-                            onChangeText={setFechaInicio}
-                            placeholder="YYYY-MM-DD"
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Fecha Término:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={fechaTermino}
-                            onChangeText={setFechaTermino}
-                            placeholder="YYYY-MM-DD"
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Monto Inicial:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={montoInicial}
-                            onChangeText={setMontoInicial}
-                            keyboardType="numeric"
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Monto Actual:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={montoActual}
-                            onChangeText={setMontoActual}
-                            keyboardType="numeric"
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Estado:</Text>
-                        <DropDownPicker
-                            open={open}
-                            value={estado}
-                            items={items}
-                            setOpen={setOpen}
-                            setValue={setEstado}
-                            setItems={setItems}
-                            style={styles.dropdown}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                    </View>
-                    <TouchableOpacity style={styles.saveButton} onPress={handleGuardar}>
-                        <Text style={styles.saveButtonText}>Guardar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-                        <Text style={styles.cancelButtonText}>Cerrar</Text>
-                    </TouchableOpacity>
-                </View>
+                </ScrollView>
             </View>
         </Modal>
     );
@@ -179,6 +182,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0,0,0,0.5)', // Fondo oscuro
+    },
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     formContainer: {
         width: '90%',

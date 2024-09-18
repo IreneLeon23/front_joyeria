@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
@@ -20,7 +20,7 @@ const ClienteDetails = ({ route }) => {
     const [pendingDays, setPendingDays] = useState([]);
     const [hiddenDays, setHiddenDays] = useState([]);
     const [daysVisible, setDaysVisible] = useState(true);
-    const [paidDaysVisible, setPaidDaysVisible] = useState(true);
+    const [paidDaysVisible, setPaidDaysVisible] = useState(false);
     const [canRenew, setCanRenew] = useState(false); // Nuevo estado para controlar la opción de renovación
     const [showRenewInput, setShowRenewInput] = useState(false);
     const [renewAmount, setRenewAmount] = useState('');
@@ -311,6 +311,7 @@ const ClienteDetails = ({ route }) => {
 
         let currentDate = new Date(startDate);
         let dayCount = 1;
+
         while (currentDate <= endDate) {
             const dayStr = currentDate.toISOString().split('T')[0];
             const abonoForDay = abonos.find(abono => abono.fecha === dayStr);
@@ -318,70 +319,73 @@ const ClienteDetails = ({ route }) => {
             const isPending = pendingDays.includes(dayStr);
             const isPaid = abonoForDay || multaForDay ? !isPending : false;
             const isHidden = hiddenDays.includes(dayStr);
-
-            if (isHidden) {
-                currentDate.setDate(currentDate.getDate() + 1);
-                dayCount++;
-                continue;
+    
+            if (!isHidden) {
+                daysArray.push({
+                    key: currentDate.toISOString(),
+                    dayStr,
+                    dayCount,
+                    currentDate: new Date(currentDate),
+                    isPaid,
+                    isPending,
+                });
             }
-
-            daysArray.push(
-                <View key={currentDate.toISOString()} style={[styles.dayCard, isPaid ? styles.paidCard : isPending ? styles.pendingCard : styles.defaultCard]}>
-                    <Text style={styles.cardText}>Día {dayCount}: {formatDateToMexican(currentDate)}</Text>
-                    <View style={styles.buttonsContainer}>
-                        <TouchableOpacity
-                            onPress={() => setFormData({ day: dayStr, type: 'abono' })}
-                            style={styles.abonoButton}
-                        >
-                            <Text style={styles.buttonText}>Pago</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => setFormData({ day: dayStr, type: 'multa' })}
-                            style={styles.multaButton}
-                        >
-                            <Text style={styles.buttonText}>Multa</Text>
-                        </TouchableOpacity>
-                        {!abonoForDay && (
-                            <TouchableOpacity
-                                onPress={() => markAsPending(dayStr)}
-                                style={[styles.pendienteButton, { backgroundColor: 'orange' }]}
-                            >
-                                <Text style={styles.buttonText}>Pendiente</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-
-                    {formData.day === dayStr && formData.type === 'abono' && (
-                        <View style={styles.formContainer}>
-                            <AbonoForm clienteId={id} onAddAbono={() => {
-                                handleAddAbono();
-                                markAsPaid(dayStr);
-                            }} />
-                        </View>
-                    )}
-                    {formData.day === dayStr && formData.type === 'multa' && (
-                        <View style={styles.formContainer}>
-                            <MultaForm clienteId={id} selectedDay={dayStr} onMultaAdded={() => {
-                                handleAddMulta();
-                                markAsPending(dayStr);
-                            }} />
-                        </View>
-                    )}
-                </View>
-            );
+    
             currentDate.setDate(currentDate.getDate() + 1);
             dayCount++;
         }
 
+        const renderItem = ({ item }) => (
+            <View style={[styles.dayCard, item.isPaid ? styles.paidCard : item.isPending ? styles.pendingCard : styles.defaultCard]}>
+                <Text style={styles.cardText}>Día {item.dayCount}: {formatDateToMexican(item.currentDate)}</Text>
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity
+                        onPress={() => setFormData({ day: item.dayStr, type: 'abono' })}
+                        style={styles.abonoButton}
+                    >
+                        <Text style={styles.buttonText}>Pago</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setFormData({ day: item.dayStr, type: 'multa' })}
+                        style={styles.multaButton}
+                    >
+                        <Text style={styles.buttonText}>Multa</Text>
+                    </TouchableOpacity>
+                    {!abonos.find(abono => abono.fecha === item.dayStr) && (
+                        <TouchableOpacity
+                            onPress={() => markAsPending(item.dayStr)}
+                            style={[styles.pendienteButton, { backgroundColor: 'orange' }]}
+                        >
+                            <Text style={styles.buttonText}>Pendiente</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+    
+                {formData.day === item.dayStr && formData.type === 'abono' && (
+                    <View style={styles.formContainer}>
+                        <AbonoForm clienteId={id} onAddAbono={() => {
+                            handleAddAbono();
+                            markAsPaid(item.dayStr);
+                        }} />
+                    </View>
+                )}
+                {formData.day === item.dayStr && formData.type === 'multa' && (
+                    <View style={styles.formContainer}>
+                        <MultaForm clienteId={id} selectedDay={item.dayStr} onMultaAdded={() => {
+                            handleAddMulta();
+                            markAsPending(item.dayStr);
+                        }} />
+                    </View>
+                )}
+            </View>
+        );
 
         return (
-            <ScrollView>
-                <FlatList
-                    data={daysArray}
-                    renderItem={({ item }) => item}
-                    keyExtractor={(item, index) => index.toString()}
-                />
-            </ScrollView>
+            <FlatList
+                data={daysArray}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.key}
+            />
         );
     };
 
@@ -424,9 +428,9 @@ const ClienteDetails = ({ route }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <View contentContainerStyle={styles.container} style={styles.container}>
             {cliente && (
-                <View>
+                <ScrollView style={{height: "110%"}}>
                     <View style={styles.detallesCliente}>
                         <Text style={styles.title}>Detalles del cliente</Text>
                         <Text style={styles.text}>Nombre: {cliente.nombre}</Text>
@@ -521,9 +525,9 @@ const ClienteDetails = ({ route }) => {
                     {multasVisible && renderMultasList()}
 
 
-                </View>
+                </ScrollView>
             )}
-        </ScrollView>
+        </View>
     );
 };
 

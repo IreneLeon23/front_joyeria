@@ -7,6 +7,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as XLSX from 'xlsx';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { Divider } from 'react-native-elements';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -118,7 +119,7 @@ const EstadisticasTablas = () => {
     const exportTrabajadorToCSV = async (data, filename) => {
         try {
             console.log("Datos para exportar:", data); // Añade esta línea para depuración
-    
+
             const formattedData = data.map((item, index) => ({
                 'No': index + 1,
                 'Nombre Trabajador': item.trabajador_nombre,
@@ -128,24 +129,24 @@ const EstadisticasTablas = () => {
                 'Total Multas Día': item.total_multas_hoy,
                 'Total Multas Semana': item.total_multas_semanales,
             }));
-    
+
             console.log("Datos formateados para exportar:", formattedData); // Añade esta línea para depuración
-    
+
             const ws = XLSX.utils.json_to_sheet(formattedData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Estadísticas Trabajador");
-    
+
             const wbout = XLSX.write(wb, { type: 'binary', bookType: 'xlsx' });
-    
+
             const uri = FileSystem.cacheDirectory + `${filename}.xlsx`;
             await FileSystem.writeAsStringAsync(uri, bufferToBase64(s2ab(wbout)), { encoding: FileSystem.EncodingType.Base64 });
-    
+
             await Sharing.shareAsync(uri);
         } catch (error) {
             console.error("Error exporting CSV:", error);
         }
     };
-    
+
 
     const handleSearch = (data, query, searchField) => {
         if (query.trim() === '') {
@@ -154,8 +155,8 @@ const EstadisticasTablas = () => {
         return data.filter(item => (item[searchField] || '').toLowerCase().includes(query.toLowerCase()));
     };
 
-const filteredEstadisticas = estadisticas ? handleSearch(estadisticas, searchQuery, 'nombre').slice(0, rowsPerPage) : [];
-const filteredTrabajadorEstadisticas = trabajadorEstadisticas ? handleSearch(trabajadorEstadisticas, workerSearchQuery, 'trabajador_nombre').slice(0, rowsPerPage) : [];
+    const filteredEstadisticas = estadisticas ? handleSearch(estadisticas, searchQuery, 'nombre').slice(0, rowsPerPage) : [];
+    const filteredTrabajadorEstadisticas = trabajadorEstadisticas ? handleSearch(trabajadorEstadisticas, workerSearchQuery, 'trabajador_nombre').slice(0, rowsPerPage) : [];
 
 
     const tableHead = ['Nombre cliente', 'Direccion', 'Telefono', 'Monto', 'Esquema de Dias-%', 'Fecha de inicio del prestamo', 'Fecha de termino', 'Observaciones'];
@@ -189,81 +190,92 @@ const filteredTrabajadorEstadisticas = trabajadorEstadisticas ? handleSearch(tra
     }
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.title}>Estadísticas Trabajadores</Text>
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.container}>
+                <Text style={styles.title}>Estadísticas Trabajadores</Text>
 
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar por nombre"
-                value={workerSearchQuery}
-                onChangeText={setWorkerSearchQuery}
-            />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Buscar por nombre"
+                    value={workerSearchQuery}
+                    onChangeText={setWorkerSearchQuery}
+                />
 
-            <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                placeholder="Seleccionar cantidad de filas por página"
-                onChangeValue={(val) => setRowsPerPage(val)}
-            />
+                <DropDownPicker
+                    open={open}
+                    value={value}
+                    items={items}
+                    setOpen={setOpen}
+                    setValue={setValue}
+                    setItems={setItems}
+                    placeholder="Seleccionar cantidad de filas por página"
+                    onChangeValue={(val) => setRowsPerPage(val)}
+                />
 
-            <ScrollView horizontal style={styles.horizontalScroll}>
-                <Table borderStyle={styles.border}>
-                    <Row data={trabajadorTableHead} style={styles.head} textStyle={styles.text} />
-                    <Rows data={trabajadorTableData} textStyle={styles.text} />
-                </Table>
+                <ScrollView style={{ marginTop: "8%", marginBottom: "8%" }}>
+                    <ScrollView horizontal>
+                        <Table borderStyle={styles.border} style={{ height: "100%" }}>
+                            <Row data={trabajadorTableHead} style={styles.head} textStyle={styles.text} />
+                            <Rows data={trabajadorTableData} textStyle={styles.text} />
+                        </Table>
+                    </ScrollView>
+                </ScrollView>
+
+                <Divider style={{ marginBottom: "2%" }}>
+                    <Button
+                        title="Exportar"
+                        onPress={() => {
+                            const fechaActual = new Date().toLocaleDateString('es-ES', {
+                                day: '2-digit', month: 'long', year: 'numeric'
+                            });
+                            exportTrabajadorToCSV(trabajadorEstadisticas, `estadisticas_trabajador_${fechaActual}`);
+                        }}
+                    />
+                </Divider>
+
+
+                <View style={styles.separator} />
+
+                <Text style={styles.title}>Estadísticas Generales</Text>
+
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Buscar por nombre"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+
+                <DropDownPicker
+                    open={open}
+                    value={value}
+                    items={items}
+                    setOpen={setOpen}
+                    setValue={setValue}
+                    setItems={setItems}
+                    placeholder="Seleccionar cantidad de filas por página"
+                    onChangeValue={(val) => setRowsPerPage(val)}
+                    style={{marginBottom: "7%"}}
+                />
+
+                <ScrollView >
+                    <ScrollView horizontal>
+                        <Table borderStyle={styles.border} style={{ height: "100%" }}>
+                            <Row data={tableHead} style={styles.head} textStyle={styles.text} />
+                            <Rows data={tableData} textStyle={styles.text} />
+                        </Table>
+                    </ScrollView>
+                </ScrollView>
+
+                <Divider style={{marginTop: "8%"}}>
+                    <Button
+                        title="Exportar a CSV"
+                        onPress={() => exportToCSV(estadisticas, 'estadisticas_general')}
+                    />
+                </Divider>
+
+                <View style={styles.footerSpace} />
             </ScrollView>
-
-            <Button
-                title="Exportar"
-                onPress={() => {
-                    const fechaActual = new Date().toLocaleDateString('es-ES', {
-                        day: '2-digit', month: 'long', year: 'numeric'
-                    });
-                    exportTrabajadorToCSV(trabajadorEstadisticas, `estadisticas_trabajador_${fechaActual}`);
-                }}
-            />
-
-
-            <View style={styles.separator} />
-
-            <Text style={styles.title}>Estadísticas Generales</Text>
-
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar por nombre"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-            />
-
-            <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                placeholder="Seleccionar cantidad de filas por página"
-                onChangeValue={(val) => setRowsPerPage(val)}
-            />
-
-            <ScrollView horizontal style={styles.horizontalScroll}>
-                <Table borderStyle={styles.border}>
-                    <Row data={tableHead} style={styles.head} textStyle={styles.text} />
-                    <Rows data={tableData} textStyle={styles.text} />
-                </Table>
-            </ScrollView>
-
-            <Button
-                title="Exportar a CSV"
-                onPress={() => exportToCSV(estadisticas, 'estadisticas_general')}
-            />
-
-            <View style={styles.footerSpace} />
-        </ScrollView>
+        </View>
     );
 };
 
@@ -271,13 +283,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        padding: 16,
+        padding: 8,
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
         marginVertical: 10,
-        textAlign: 'center'
+        textAlign: 'center',
     },
     searchInput: {
         height: 50,
@@ -285,19 +297,18 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginBottom: 10,
         paddingHorizontal: 10,
-        width: screenWidth - 32,
+        // width: screenWidth - 32,
         borderRadius: 4,
     },
     border: {
         borderWidth: 1,
         borderColor: '#c8e1ff',
-        
+
     },
     head: {
-        height: 70,
+        height: "auto",
         width: 'auto',
         backgroundColor: '#f1f8ff',
-        
     },
     text: {
         margin: 10,
@@ -309,17 +320,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
     },
-    horizontalScroll: {
-        marginVertical: 0,
-        
-    },
     separator: {
         height: 0,
     },
     footerSpace: {
         height: 0,
     },
-    
+
 });
 
 export default EstadisticasTablas;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, FlatList, Button, StyleSheet, TextInput, Text } from 'react-native';
+import { View, FlatList, StyleSheet, TextInput, Text, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
@@ -64,14 +64,9 @@ const WorkerDashboard = ({ navigation }) => {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                <View style={styles.buttonContainer}>
-                    <Button
-                        onPress={handleLogout}
-                        title="Cerrar sesión"
-                        color="red"
-                        
-                    />
-                </View>
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                    <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+                </TouchableOpacity>
             ),
         });
     }, [navigation]);
@@ -110,17 +105,10 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     title: {
-        fontSize: 30,
+        fontSize: 24,
         fontWeight: 'bold',
         color: '#fff',
         marginBottom: 10,
-    },
-    buttonContainer: {
-        width: 125,
-        height: 38,
-        margin: 'end',
-        marginRight: 10,
-        marginTop: 10,
     },
     searchInput: {
         height: 40,
@@ -131,6 +119,17 @@ const styles = StyleSheet.create({
         color: '#fff',
         marginBottom: 10,
         backgroundColor: '#fff',
+    },
+    logoutButton: {
+        marginRight: 15,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#2e5c74', // Color de fondo
+        borderRadius: 5,
+    },
+    logoutButtonText: {
+        color: '#fff', // Color del texto
+        fontWeight: 'bold',
     },
 });
 
