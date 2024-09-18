@@ -16,9 +16,9 @@ import EliminarTrabajador from './components/EliminarTrabajador';
 import EditarClientes from './components/EditarClientes';
 import EstadisticasGraficas from './components/EstadisticasGraficas';
 import EstadisticasTablas from './components/EstadisticasTablas';
-import { Amplify } from 'aws-amplify';
-import amplifyconfig from './src/amplifyconfiguration.json';
-Amplify.configure(amplifyconfig);
+// import { Amplify } from 'aws-amplify';
+// import amplifyconfig from './src/amplifyconfiguration.json';
+// Amplify.configure(amplifyconfig);
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();

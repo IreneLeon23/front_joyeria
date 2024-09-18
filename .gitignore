@@ -22,3 +22,6 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 .vercel
+
+# Local Netlify folder
+.netlify
