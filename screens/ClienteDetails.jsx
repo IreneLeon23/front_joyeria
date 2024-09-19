@@ -9,7 +9,6 @@ import DropDownPicker from 'react-native-dropdown-picker';
 
 
 
-
 const ClienteDetails = ({ route }) => {
     const { id } = route.params;
     const [cliente, setCliente] = useState(null);
@@ -181,11 +180,31 @@ const ClienteDetails = ({ route }) => {
         checkRenewalEligibility();
     };
 
-    const formatDateToMexican = (dateStr) => {
-        const date = new Date(dateStr);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
+    // const formatDateToMexican = (dateStr) => {
+    //     const date = new Date(dateStr);
+    //     const day = date.getDate().toString().padStart(2, '0');
+    //     const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    //     const year = date.getFullYear();
+    //     return `${day}/${month}/${year}`;
+    // };
+
+    const customDateFormat = (dateObjectOrString) => {
+        let dateString;
+
+        // Si dateObjectOrString es un objeto Date, conviértelo a una cadena
+        if (dateObjectOrString instanceof Date) {
+            dateString = dateObjectOrString.toISOString().split('T')[0];
+        } else {
+            dateString = dateObjectOrString;
+        }
+
+        // Extraer solo la parte de la fecha (hasta la 'T')
+        const datePart = dateString.split('T')[0];
+
+        // Dividir la fecha en año, mes y día
+        const [year, month, day] = datePart.split('-');
+
+        // Formatear la fecha como DD/MM/YYYY
         return `${day}/${month}/${year}`;
     };
 
@@ -313,7 +332,7 @@ const ClienteDetails = ({ route }) => {
         let dayCount = 1;
 
         while (currentDate <= endDate) {
-            const dayStr = currentDate.toISOString().split('T')[0];
+            const dayStr = currentDate;
             const abonoForDay = abonos.find(abono => abono.fecha === dayStr);
             const multaForDay = multas.find(multa => multa.fecha === dayStr);
             const isPending = pendingDays.includes(dayStr);
@@ -337,7 +356,7 @@ const ClienteDetails = ({ route }) => {
 
         const renderItem = ({ item }) => (
             <View style={[styles.dayCard, item.isPaid ? styles.paidCard : item.isPending ? styles.pendingCard : styles.defaultCard]}>
-                <Text style={styles.cardText}>Día {item.dayCount}: {formatDateToMexican(item.currentDate)}</Text>
+                <Text style={styles.cardText}>Día {item.dayCount}: {customDateFormat(item.currentDate)}</Text>
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
                         onPress={() => setFormData({ day: item.dayStr, type: 'abono' })}
@@ -399,7 +418,7 @@ const ClienteDetails = ({ route }) => {
                 data={abonos}
                 renderItem={({ item }) => (
                     <View style={styles.abonoCard}>
-                        <Text style={styles.abonoText}>Fecha: {formatDateToMexican(item.fecha)}</Text>
+                        <Text style={styles.abonoText}>Fecha: {customDateFormat(item.fecha)}</Text>
                         <Text style={styles.abonoText}>Cantidad: ${item.monto}</Text>
                     </View>
                 )}
@@ -418,7 +437,7 @@ const ClienteDetails = ({ route }) => {
                 data={multas}
                 renderItem={({ item }) => (
                     <View style={styles.multaCard}>
-                        <Text style={styles.abonoText}>Fecha: {formatDateToMexican(item.fecha)}</Text>
+                        <Text style={styles.abonoText}>Fecha: {customDateFormat(item.fecha)}</Text>
                         <Text style={styles.abonoText}>Cantidad: ${item.monto}</Text>
                     </View>
                 )}
@@ -430,12 +449,12 @@ const ClienteDetails = ({ route }) => {
     return (
         <View contentContainerStyle={styles.container} style={styles.container}>
             {cliente && (
-                <ScrollView style={{height: "110%"}}>
+                <ScrollView style={{ height: "110%" }}>
                     <View style={styles.detallesCliente}>
                         <Text style={styles.title}>Detalles del cliente</Text>
                         <Text style={styles.text}>Nombre: {cliente.nombre}</Text>
-                        <Text style={styles.text}>Fecha de Inicio: {formatDateToMexican(cliente.fecha_inicio)}</Text>
-                        <Text style={styles.text}>Fecha de Término: {formatDateToMexican(cliente.fecha_termino)}</Text>
+                        <Text style={styles.text}>Fecha de Inicio: {customDateFormat(cliente.fecha_inicio)}</Text>
+                        <Text style={styles.text}>Fecha de Término: {customDateFormat(cliente.fecha_termino)}</Text>
                         <Text style={styles.text}>Estado: {cliente.estado}</Text>
                         <Text style={styles.text}>Monto inicial: ${cliente.monto_inicial}</Text>
                         <Text style={styles.text}>Monto actual: ${cliente.monto_actual}</Text>
@@ -511,14 +530,14 @@ const ClienteDetails = ({ route }) => {
                     {daysVisible && renderDaysCards()}
                     <TouchableOpacity
                         onPress={() => setPaidDaysVisible(!paidDaysVisible)}
-                        style={[styles.button, { marginBottom: 10, marginTop: 10  }]}
+                        style={[styles.button, { marginBottom: 10, marginTop: 10 }]}
                     >
                         <Text style={styles.buttonText}>{paidDaysVisible ? 'Ocultar Abonos' : 'Mostrar Abonos'}</Text>
                     </TouchableOpacity>
                     {paidDaysVisible && renderAbonosList()}
                     <TouchableOpacity
                         onPress={() => setMultasVisible(!multasVisible)}
-                        style={[styles.button, { marginBottom: 10, marginTop: 10  }]}
+                        style={[styles.button, { marginBottom: 10, marginTop: 10 }]}
                     >
                         <Text style={styles.buttonText}>{multasVisible ? 'Ocultar Multas' : 'Mostrar Multas'}</Text>
                     </TouchableOpacity>
@@ -535,7 +554,7 @@ const styles = StyleSheet.create({
     container: {
         padding: 16,
         backgroundColor: '#1c1c1e',
-        height: '100%' ,
+        height: '100%',
     },
     detallesCliente: {
         backgroundColor: '#E8E8E8',

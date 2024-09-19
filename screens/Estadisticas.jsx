@@ -65,9 +65,9 @@ const EstadisticasScreen = () => {
                 <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EstadisticasTablas')}>
                     <Image source={require('../assets/table_icon.png')} style={styles.icon} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EstadisticasGraficas', { estadisticas })}>
+                {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EstadisticasGraficas', { estadisticas })}>
                     <Image source={require('../assets/chart_icon.png')} style={styles.icon} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         </View>
     );
