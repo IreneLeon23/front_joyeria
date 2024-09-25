@@ -1,29 +1,51 @@
 import React from 'react';
-import { Modal, View, Text, Button, StyleSheet } from 'react-native';
+import { Modal, View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
 
-const EliminarClientes = ({ cliente, visible, onEliminar, onClose }) => {
+const EliminarClientes = ({ cliente, visible, onEliminar, onClose, loading, deleteMessage }) => {
+
+    const handleClose = () => {
+        onClose();
+    };
+
     return (
         <Modal
             animationType="slide"
             transparent={true}
             visible={visible}
-            onRequestClose={onClose}
+            onRequestClose={handleClose}
         >
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                    <Text style={styles.modalText}>¿Estás seguro de que deseas eliminar a {cliente.nombre}?</Text>
-                    <View style={styles.buttonContainer}>
-                        <Button
-                            title="Cancelar"
-                            onPress={onClose}
-                            color="#888"
-                        />
-                        <Button
-                            title="Eliminar"
-                            onPress={() => onEliminar(cliente.id)}
-                            color="#b22222"
-                        />
-                    </View>
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#b22222" />
+                    ) : deleteMessage ? (
+                        <>
+                            <Text style={styles.modalText}>{deleteMessage}</Text>
+                            <Button
+                                title="OK"
+                                onPress={handleClose}
+                                color="#4CAF50"
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <Text style={styles.modalText}>
+                                ¿Estás seguro de que deseas eliminar a {cliente.nombre}?
+                            </Text>
+                            <View style={styles.buttonContainer}>
+                                <Button
+                                    title="Cancelar"
+                                    onPress={handleClose}
+                                    color="#888"
+                                />
+                                <Button
+                                    title="Eliminar"
+                                    onPress={() => onEliminar(cliente.id)}
+                                    color="#b22222"
+                                />
+                            </View>
+                        </>
+                    )}
                 </View>
             </View>
         </Modal>

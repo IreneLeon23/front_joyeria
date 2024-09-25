@@ -44,8 +44,8 @@ function WorkerTabs() {
                 },
             })}
         >
-            <Tab.Screen name="Inicio" component={WorkerDashboard} />
-            <Tab.Screen name="Agregar Cliente" component={NuevoCliente} />
+            <Tab.Screen name="Inicio" component={WorkerDashboard} options={{ headerShown: false }}/>
+            <Tab.Screen name="Agregar Cliente" component={NuevoCliente} options={{ headerShown: false }}/>
         </Tab.Navigator>
     );
 }
@@ -73,9 +73,9 @@ function AdminTabs() {
                 },
             })}
         >
-            <Tab.Screen name="Inicio" component={AdminDashboard} />
-            <Tab.Screen name="Agregar Trabajador" component={NuevoTrabajador} />
-            <Tab.Screen name="Estadisticas" component={EstadisticasScreen} />
+            <Tab.Screen name="Inicio" component={AdminDashboard} options={{ headerShown: false }}/>
+            <Tab.Screen name="Agregar Trabajador" component={NuevoTrabajador} options={{ headerShown: false }}/>
+            <Tab.Screen name="Estadisticas" component={EstadisticasScreen} options={{ headerShown: false }}/>
         </Tab.Navigator>
     );
 }

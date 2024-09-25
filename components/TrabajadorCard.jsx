@@ -7,6 +7,10 @@ import EditarTrabajador from './EditarTrabajador';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as XLSX from 'xlsx';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(localizedFormat);
 
 const TrabajadorCard = ({ trabajador, navigation, onDelete }) => {
     const [showClientes, setShowClientes] = useState(false);
@@ -81,18 +85,26 @@ const TrabajadorCard = ({ trabajador, navigation, onDelete }) => {
             const formattedData = data.map((cliente, index) => ({
                 'No.': index + 1,
                 'Nombre cliente': cliente.nombre,
-                'Direccion': cliente.direccion,
+                // 'Direccion': cliente.direccion,
                 'Telefono': cliente.telefono,
                 'Monto inicial': cliente.monto_inicial,
-                'Esquema de Dias-%': `${cliente.dias_prestamo === 15 ? `15 días $85x1000 30%` : cliente.dias_prestamo === 20 ? `20 días $65x1000 30%` : cliente.esquema_dias}`,
-                'Fecha de inicio del prestamo': new Date(cliente.fecha_inicio).toLocaleDateString('es-ES', {
-                    day: '2-digit', month: 'long', year: 'numeric'
-                }),
-                'Fecha de termino': new Date(cliente.fecha_termino).toLocaleDateString('es-ES', {
-                    day: '2-digit', month: 'long', year: 'numeric'
-                }),
+                'Esquema de Dias-%': `${(cliente.dias_prestamo === 15 || cliente.dias_prestamo === 16) ?
+                    `15 días $85x1000 30%` :
+                    (cliente.dias_prestamo === 20 || cliente.dias_prestamo === 21) ?
+                        `20 días $65x1000 30%` :
+                        cliente.esquema_dias}`,
+                // 'Fecha de inicio del prestamo': new Date(cliente.fecha_inicio).toLocaleDateString('es-ES', {
+                //     day: '2-digit', month: 'long', year: 'numeric'
+                // }),
+                // 'Fecha de termino': new Date(cliente.fecha_termino).toLocaleDateString('es-ES', {
+                //     day: '2-digit', month: 'long', year: 'numeric'
+                // }),
+                'Fecha de inicio del prestamo': dayjs(cliente.fecha_inicio).tz('America/Mexico_City').locale('es').format('DD MMMM YYYY'),
+                'Fecha de termino': dayjs(cliente.fecha_termino).tz('America/Mexico_City').locale('es').format('DD MMMM YYYY'),
                 'Observaciones': cliente.ocupacion
             }));
+
+            console.log(data);
 
             const ws = XLSX.utils.json_to_sheet(formattedData);
             const wb = XLSX.utils.book_new();

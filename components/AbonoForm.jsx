@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const AbonoForm = ({ clienteId, onAddAbono }) => {
     const [monto, setMonto] = useState('');
@@ -21,7 +26,8 @@ const AbonoForm = ({ clienteId, onAddAbono }) => {
             }
 
             // const fecha = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
-            const fecha = moment.tz(new Date(), 'America/Mexico_City').format('YYYY-MM-DD')
+            const fecha = dayjs().tz('America/Mexico_City').format('YYYY-MM-DD').split('T')[0];
+            // const formattedDate = fecha.split('T')[0];
 
             const response = await axios.post(`https://prestamos-back-production.up.railway.app/clientes/${clienteId}/abonos`, { monto: parseFloat(monto), fecha }, {
                 headers: {

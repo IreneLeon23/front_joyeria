@@ -8,6 +8,10 @@ import * as Sharing from 'expo-sharing';
 import * as XLSX from 'xlsx';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Divider } from 'react-native-elements';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(localizedFormat);
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -95,13 +99,13 @@ const EstadisticasTablas = () => {
             'Direccion': item.direccion,
             'Telefono': item.telefono,
             'Monto': item.monto_inicial,
-            'Esquema de Dias-%': item.dias_prestamo === 15 ? `15 días $85x1000 30%` : item.dias_prestamo === 20 ? `20 días $65x1000 30%` : item.esquema_dias,
-            'Fecha de inicio del prestamo': new Date(item.fecha_inicio).toLocaleDateString('es-ES', {
-                day: '2-digit', month: 'long', year: 'numeric'
-            }),
-            'Fecha de termino': new Date(item.fecha_termino).toLocaleDateString('es-ES', {
-                day: '2-digit', month: 'long', year: 'numeric'
-            }),
+            'Esquema de Dias-%': `${(item.dias_prestamo === 15 || item.dias_prestamo === 16) ?
+                `15 días $85x1000 30%` :
+                (item.dias_prestamo === 20 || item.dias_prestamo === 21) ?
+                    `20 días $65x1000 30%` :
+                    item.esquema_dias}`,
+            'Fecha de inicio del prestamo': dayjs(item.fecha_inicio).tz('America/Mexico_City').locale('es').format('DD MMMM YYYY'),
+            'Fecha de termino': dayjs(item.fecha_termino).tz('America/Mexico_City').locale('es').format('DD MMMM YYYY'),
             'Observaciones': item.ocupacion
         }));
 
@@ -123,7 +127,7 @@ const EstadisticasTablas = () => {
             const formattedData = data.map((item, index) => ({
                 'No': index + 1,
                 'Nombre Trabajador': item.trabajador_nombre,
-                'Fecha': new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
+                'Fecha': dayjs().tz('America/Mexico_City').local('es').format('DD MMMM YYYY'),
                 'Total Abonos Día': item.total_abonos_diario_hoy,
                 'Total Abonos Semana': item.total_abonos_semanales,
                 'Total Multas Día': item.total_multas_hoy,
@@ -165,16 +169,24 @@ const EstadisticasTablas = () => {
         item.direccion,
         item.telefono,
         item.monto_inicial,
-        item.dias_prestamo === 15 ? `15 días - $85x1000 30%` : item.dias_prestamo === 20 ? `20 días - $65x1000` : item.esquema_dias,
-        new Date(item.fecha_inicio).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
-        new Date(item.fecha_termino).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
+        // item.dias_prestamo === 15 ? `15 días - $85x1000 30%` : item.dias_prestamo === 20 ? `20 días - $65x1000` : item.esquema_dias,
+        (item.dias_prestamo === 15 || item.dias_prestamo === 16) ?
+            '15 días - $85x1000 30%' :
+            (item.dias_prestamo === 20 || item.dias_prestamo === 21) ?
+                '20 días - $65x1000' :
+                item.esquema_dias,
+        dayjs(item.fecha_inicio).tz('America/Mexico_City').local('es').format('DD MMMM YYYY'),
+        dayjs(item.fecha_termino).tz('America/Mexico_City').local('es').format('DD MMMM YYYY'),
+        // new Date(item.fecha_inicio).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
+        // new Date(item.fecha_termino).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
         item.ocupacion
     ]);
 
     const trabajadorTableHead = ['Nombre Trabajador', 'Fecha', 'Abono x Día', 'Abono x Semana', 'Multas x Día', 'Multas x Semana'];
     const trabajadorTableData = filteredTrabajadorEstadisticas.map(item => [
         item.trabajador_nombre,
-        new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
+        dayjs().tz('America/Mexico_City').local('es').format('DD MMMM YYYY'),
+        // new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
         item.total_abonos_diarios,
         item.total_abonos_semanales,
         item.total_multas_hoy,
@@ -225,9 +237,11 @@ const EstadisticasTablas = () => {
                     <Button
                         title="Exportar"
                         onPress={() => {
-                            const fechaActual = new Date().toLocaleDateString('es-ES', {
-                                day: '2-digit', month: 'long', year: 'numeric'
-                            });
+                            const fechaActual = dayjs()
+                                .tz('America/Mexico_City')
+                                .locale('es')
+                                .format('DD MMMM YYYY');
+
                             exportTrabajadorToCSV(trabajadorEstadisticas, `estadisticas_trabajador_${fechaActual}`);
                         }}
                     />
@@ -254,7 +268,7 @@ const EstadisticasTablas = () => {
                     setItems={setItems}
                     placeholder="Seleccionar cantidad de filas por página"
                     onChangeValue={(val) => setRowsPerPage(val)}
-                    style={{marginBottom: "7%"}}
+                    style={{ marginBottom: "7%" }}
                 />
 
                 <ScrollView >
@@ -266,7 +280,7 @@ const EstadisticasTablas = () => {
                     </ScrollView>
                 </ScrollView>
 
-                <Divider style={{marginTop: "8%"}}>
+                <Divider style={{ marginTop: "8%" }}>
                     <Button
                         title="Exportar a CSV"
                         onPress={() => exportToCSV(estadisticas, 'estadisticas_general')}

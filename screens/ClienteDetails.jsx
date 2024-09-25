@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AbonoForm from '../components/AbonoForm';
 import MultaForm from '../components/MultaForm';
 import DropDownPicker from 'react-native-dropdown-picker';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(localizedFormat);
 
 
 
@@ -33,6 +41,9 @@ const ClienteDetails = ({ route }) => {
         { label: '20 días', value: '20 días' },
     ]);
     const isFormValid = amountValid && renewAmount !== '' && fechaTermino !== null;
+    const [formattedAbonos, setFormattedAbonos] = useState([]);
+    const [formattedMultas, setFormattedMultas] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const navigation = useNavigation();
 
@@ -90,17 +101,44 @@ const ClienteDetails = ({ route }) => {
                 }
             });
             setAbonos(abonosResponse.data);
+            formatAbonos(abonosResponse.data);
 
             const multasResponse = await axios.get(`https://prestamos-back-production.up.railway.app/clientes/${id}/multas`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
+
             setMultas(multasResponse.data);
+            formatMultas(multasResponse.data);
         } catch (error) {
             console.error('Error fetching details:', error);
         }
     };
+
+    function formatAbonos(abonos) {
+        const formattedDates = abonos.map(abono => {
+            const date = dayjs(abono.fecha).tz('America/Mexico_City');
+            return {
+                ...abono,
+                fechaFormateada: date.format('YYYY-MM-DD')
+            };
+        });
+
+        setFormattedAbonos(formattedDates);
+    }
+
+    function formatMultas(multas) {
+        const formattedDates = multas.map(multa => {
+            const date = dayjs(multa.fecha).tz('America/Mexico_City');
+            return {
+                ...multa,
+                fechaFormateada: date.format('YYYY-MM-DD')
+            };
+        });
+
+        setFormattedMultas(formattedDates);
+    }
 
     const loadPendingDays = async () => {
         try {
@@ -152,21 +190,15 @@ const ClienteDetails = ({ route }) => {
     };
 
     const handleAddMulta = async () => {
-        const today = new Date().toISOString().split('T')[0];
-        const lastActionDate = await AsyncStorage.getItem(`lastActionDate_${id}_multa`);
-
-        if (lastActionDate === today) {
-            Alert.alert('Acción no permitida', 'Solo puedes agregar una multa por día.');
-            return;
+        try {
+            await fetchDetails(); 
+            setFormData({ day: null, type: null });
+            Alert.alert('Multa agregada con éxito', 'La multa se ha agregado correctamente.');
+        } catch (error) {
+            console.error('Error al actualizar los detalles:', error);
+            Alert.alert('Error', 'Ocurrió un problema al actualizar los detalles.');
         }
-
-        await AsyncStorage.setItem(`lastActionDate_${id}_multa`, today);
-        fetchDetails();
-        setFormData({ day: null, type: null });
-        Alert.alert('Multa agregada con éxito', 'La multa se ha agregado correctamente.');
     };
-
-
 
 
     const markAsPending = (dayStr) => {
@@ -180,31 +212,19 @@ const ClienteDetails = ({ route }) => {
         checkRenewalEligibility();
     };
 
-    // const formatDateToMexican = (dateStr) => {
-    //     const date = new Date(dateStr);
-    //     const day = date.getDate().toString().padStart(2, '0');
-    //     const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    //     const year = date.getFullYear();
-    //     return `${day}/${month}/${year}`;
-    // };
-
     const customDateFormat = (dateObjectOrString) => {
         let dateString;
 
-        // Si dateObjectOrString es un objeto Date, conviértelo a una cadena
         if (dateObjectOrString instanceof Date) {
             dateString = dateObjectOrString.toISOString().split('T')[0];
         } else {
             dateString = dateObjectOrString;
         }
 
-        // Extraer solo la parte de la fecha (hasta la 'T')
         const datePart = dateString.split('T')[0];
 
-        // Dividir la fecha en año, mes y día
         const [year, month, day] = datePart.split('-');
 
-        // Formatear la fecha como DD/MM/YYYY
         return `${day}/${month}/${year}`;
     };
 
@@ -219,50 +239,58 @@ const ClienteDetails = ({ route }) => {
     const handleRenewLoan = () => {
         setShowRenewInput(true);
     };
+
     const handleConfirmRenewal = async () => {
+        setIsLoading(true);
+
         const remainingAmount = cliente.monto_actual;
-    
+
         if (renewAmount === '') {
             Alert.alert('Error', 'Por favor ingresa el monto para renovar el préstamo.');
             return;
         }
-    
+
         const amountToRenew = parseFloat(renewAmount);
         const tolerance = 0.01;
         if (Math.abs(amountToRenew - remainingAmount) > tolerance) {
             Alert.alert('Error', `La cantidad ingresada debe ser exactamente ${remainingAmount}.`);
             return;
         }
-    
+
         try {
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('No token found');
                 return;
             }
-    
+
             // Calcular el nuevo monto con el 30% de interés
             const interestRate = 0.30;
             const newAmountInitial = parseFloat(newInitialAmount);
             const newAmountWithInterest = newAmountInitial * (1 + interestRate);
-    
+
             // Nueva fecha de inicio
-            const fechaInicio = new Date(); // Crear una nueva instancia de Date
-            fechaInicio.setDate(fechaInicio.getDate() + 2); // Sumar 1 día a la fecha actual
-    
+            // const fechaInicio = new Date(); // Crear una nueva instancia de Date
+            // fechaInicio.setDate(fechaInicio.getDate() + 1); // Sumar 1 día a la fecha actual
+            
+            fechaInicio = dayjs().startOf('day').add(1, 'day');
+            fechaInicio.format();
+            
             let newFechaTermino;
             if (fechaTermino === '15 días') {
-                newFechaTermino = new Date(fechaInicio);
-                newFechaTermino.setDate(newFechaTermino.getDate() + 14); // Agrega 14 días (para completar 15 días)
+                // newFechaTermino = new Date(fechaInicio);
+                // newFechaTermino.setDate(newFechaTermino.getDate() + 14); // Agrega 14 días (para completar 15 días)
+                newFechaTermino = fechaInicio.add(14, 'day');
             } else if (fechaTermino === '20 días') {
-                newFechaTermino = new Date(fechaInicio);
-                newFechaTermino.setDate(newFechaTermino.getDate() + 19); // Agrega 19 días (para completar 20 días)
+                // newFechaTermino = new Date(fechaInicio);
+                // newFechaTermino.setDate(newFechaTermino.getDate() + 19); // Agrega 19 días (para completar 20 días)
+                newFechaTermino = fechaInicio.add(19, 'day');
             }
-    
+
             // Formatear la fecha en un formato aceptable para la base de datos (ISO8601)
-            const formattedFechaInicio = fechaInicio.toISOString().split('T')[0];
-            const formattedFechaTermino = newFechaTermino.toISOString().split('T')[0];
-    
+            const formattedFechaInicio = fechaInicio.format('YYYY-MM-DD');
+            const formattedFechaTermino = newFechaTermino.format('YYYY-MM-DD');
+
             const updatedClient = {
                 nombre: cliente.nombre,           // Mantener nombre existente
                 ocupacion: cliente.ocupacion,     // Mantener ocupación existente
@@ -274,30 +302,32 @@ const ClienteDetails = ({ route }) => {
                 fecha_inicio: formattedFechaInicio, // Nueva fecha de inicio
                 fecha_termino: formattedFechaTermino // Nueva fecha de término
             };
-    
+
             await axios.put(`https://prestamos-back-production.up.railway.app/clientes/${id}`, updatedClient, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-    
+
             setCliente(prevCliente => ({
                 ...prevCliente,
                 ...updatedClient
             }));
-    
+
             // Reiniciar el array de días al primer día
             setPendingDays([]);
             setHiddenDays([]);
-    
+
             setShowRenewInput(false);
             Alert.alert('Renovación exitosa', 'El préstamo ha sido renovado correctamente.');
         } catch (error) {
             console.error('Error al renovar el préstamo:', error);
             Alert.alert('Error', 'Hubo un problema al renovar el préstamo.');
+        } finally {
+            setIsLoading(false);
         }
     };
-    
+
 
 
 
@@ -324,80 +354,103 @@ const ClienteDetails = ({ route }) => {
     const renderDaysCards = () => {
         if (!cliente) return null;
 
-        const startDate = new Date(cliente.fecha_inicio);
-        const endDate = new Date(cliente.fecha_termino);
-        const daysArray = [];
+        const startDate = dayjs(cliente.fecha_inicio).startOf('day');
+        const endDate = dayjs(cliente.fecha_termino).startOf('day');
 
-        let currentDate = new Date(startDate);
+        const daysArray = [];
+        let currentDate = dayjs(startDate).tz('America/Mexico_City').add(1, 'day');
+
         let dayCount = 1;
 
         while (currentDate <= endDate) {
-            const dayStr = currentDate;
-            const abonoForDay = abonos.find(abono => abono.fecha === dayStr);
-            const multaForDay = multas.find(multa => multa.fecha === dayStr);
+            // const dayStr = currentDate.toISOString().split('T')[0];
+            const dayStr = currentDate.format('YYYY-MM-DD');
+            // const abonoForDay = abonos.find(abono => abono.fecha === dayStr);
+            const abonoForDay = formattedAbonos.find(abono => abono.fechaFormateada === dayStr);
+            // const multaForDay = multas.find(multa => multa.fecha === dayStr);
+            const multaForDay = formattedMultas.find(multa => multa.fechaFormateada === dayStr);
             const isPending = pendingDays.includes(dayStr);
             const isPaid = abonoForDay || multaForDay ? !isPending : false;
             const isHidden = hiddenDays.includes(dayStr);
-    
+
             if (!isHidden) {
                 daysArray.push({
-                    key: currentDate.toISOString(),
+                    // key: currentDate.toISOString(),
+                    key: currentDate.format(),
                     dayStr,
                     dayCount,
-                    currentDate: new Date(currentDate),
+                    // dayCount: daysArray.length + 1,
+                    // currentDate: new Date(currentDate),
+                    currentDate: currentDate.format(),
                     isPaid,
                     isPending,
                 });
             }
-    
-            currentDate.setDate(currentDate.getDate() + 1);
+
+            currentDate = currentDate.add(1, 'day');
             dayCount++;
         }
 
-        const renderItem = ({ item }) => (
-            <View style={[styles.dayCard, item.isPaid ? styles.paidCard : item.isPending ? styles.pendingCard : styles.defaultCard]}>
-                <Text style={styles.cardText}>Día {item.dayCount}: {customDateFormat(item.currentDate)}</Text>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        onPress={() => setFormData({ day: item.dayStr, type: 'abono' })}
-                        style={styles.abonoButton}
-                    >
-                        <Text style={styles.buttonText}>Pago</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => setFormData({ day: item.dayStr, type: 'multa' })}
-                        style={styles.multaButton}
-                    >
-                        <Text style={styles.buttonText}>Multa</Text>
-                    </TouchableOpacity>
-                    {!abonos.find(abono => abono.fecha === item.dayStr) && (
+        if (currentDate > endDate) {
+            const lastDay = dayjs(endDate).add(1, 'day').format('YYYY-MM-DD');
+            if (!daysArray.find(item => item.dayStr === lastDay)) {
+                daysArray.push({
+                    key: lastDay,
+                    dayStr: lastDay,
+                    dayCount: dayCount,
+                    currentDate: lastDay,
+                    isPaid: false,
+                    isPending: pendingDays.includes(lastDay),
+                });
+            }
+        }
+
+        const renderItem = ({ item }) => {
+            return (
+                <View style={[styles.dayCard, item.isPaid ? styles.paidCard : item.isPending ? styles.pendingCard : styles.defaultCard]}>
+                    <Text style={styles.cardText}>Día {item.dayCount}: {customDateFormat(item.currentDate)}</Text>
+                    <View style={styles.buttonsContainer}>
                         <TouchableOpacity
-                            onPress={() => markAsPending(item.dayStr)}
-                            style={[styles.pendienteButton, { backgroundColor: 'orange' }]}
+                            onPress={() => setFormData({ day: item.dayStr, type: 'abono' })}
+                            style={styles.abonoButton}
                         >
-                            <Text style={styles.buttonText}>Pendiente</Text>
+                            <Text style={styles.buttonText}>Pago</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setFormData({ day: item.dayStr, type: 'multa' })}
+                            style={styles.multaButton}
+                        >
+                            <Text style={styles.buttonText}>Multa</Text>
+                        </TouchableOpacity>
+                        {!formattedAbonos.find(abono => abono.fechaFormateada === item.dayStr) && (
+                            <TouchableOpacity
+                                onPress={() => markAsPending(item.dayStr)}
+                                style={[styles.pendienteButton, { backgroundColor: 'orange' }]}
+                            >
+                                <Text style={styles.buttonText}>Pendiente</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    {formData.day === item.dayStr && formData.type === 'abono' && (
+                        <View style={styles.formContainer}>
+                            <AbonoForm clienteId={id} onAddAbono={() => {
+                                handleAddAbono();
+                                markAsPaid(item.dayStr);
+                            }} />
+                        </View>
+                    )}
+                    {formData.day === item.dayStr && formData.type === 'multa' && (
+                        <View style={styles.formContainer}>
+                            <MultaForm clienteId={id} selectedDay={item.dayStr} onMultaAdded={() => {
+                                handleAddMulta();
+                                markAsPending(item.dayStr);
+                            }} />
+                        </View>
                     )}
                 </View>
-    
-                {formData.day === item.dayStr && formData.type === 'abono' && (
-                    <View style={styles.formContainer}>
-                        <AbonoForm clienteId={id} onAddAbono={() => {
-                            handleAddAbono();
-                            markAsPaid(item.dayStr);
-                        }} />
-                    </View>
-                )}
-                {formData.day === item.dayStr && formData.type === 'multa' && (
-                    <View style={styles.formContainer}>
-                        <MultaForm clienteId={id} selectedDay={item.dayStr} onMultaAdded={() => {
-                            handleAddMulta();
-                            markAsPending(item.dayStr);
-                        }} />
-                    </View>
-                )}
-            </View>
-        );
+            )
+        };
 
         return (
             <FlatList
@@ -459,6 +512,14 @@ const ClienteDetails = ({ route }) => {
                         <Text style={styles.text}>Monto inicial: ${cliente.monto_inicial}</Text>
                         <Text style={styles.text}>Monto actual: ${cliente.monto_actual}</Text>
                     </View>
+
+                    {/* //!TESTING DATES PARA MULTAS */}
+                    {/* <TouchableOpacity
+                        onPress={test}
+                    >
+                        <Text style={styles.buttonText}>Test</Text>
+                    </TouchableOpacity> */}
+
                     {canRenew && !showRenewInput && (
                         <TouchableOpacity
                             onPress={handleRenewLoan}
@@ -507,9 +568,13 @@ const ClienteDetails = ({ route }) => {
                             <TouchableOpacity
                                 onPress={isFormValid ? handleConfirmRenewal : null}
                                 style={[styles.button, { marginTop: 10, backgroundColor: isFormValid ? 'green' : 'gray' }]}
-                                disabled={!isFormValid}
+                                disabled={!isFormValid || isLoading}
                             >
-                                <Text style={styles.buttonText}>Confirmar Renovación</Text>
+                                {isLoading ? (
+                                    <ActivityIndicator size="large" color="#28A745"/>
+                                ) : (
+                                    <Text style={styles.buttonText}>Confirmar Renovación</Text>
+                                )}
                             </TouchableOpacity>
 
                             <TouchableOpacity

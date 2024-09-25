@@ -8,6 +8,10 @@ import EliminarClientes from '../components/EliminarClientes';
 import * as XLSX from 'xlsx';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(localizedFormat);
 
 const TrabajadorClientes = ({ route, navigation }) => {
     const { id, clienteActualizado, isFromEdit } = route.params || {};
@@ -18,6 +22,8 @@ const TrabajadorClientes = ({ route, navigation }) => {
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [eliminarVisible, setEliminarVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [deleteMessage, setDeleteMessage] = useState('');
 
     const decodeToken = (token) => {
         const base64Url = token.split('.')[1];
@@ -92,7 +98,10 @@ const TrabajadorClientes = ({ route, navigation }) => {
             setEliminarVisible(false);
             return;
         }
-        
+
+        setLoading(true);
+        setDeleteMessage('');
+
         try {
             const token = await AsyncStorage.getItem('token');
 
@@ -107,10 +116,13 @@ const TrabajadorClientes = ({ route, navigation }) => {
             const updatedClientes = clientes.filter(cliente => cliente.id !== clienteId);
             setClientes(updatedClientes);
             setFilteredClientes(updatedClientes);
+            setDeleteMessage('Cliente eliminado con éxito');
         } catch (error) {
             console.error(error);
+            setDeleteMessage('Error al eliminar el cliente');
         } finally {
-            setEliminarVisible(false);
+            // setEliminarVisible(false);
+            setLoading(false);
         }
     };
 
@@ -129,14 +141,14 @@ const TrabajadorClientes = ({ route, navigation }) => {
             if (!token) {
                 throw new Error('No se encontró el token');
             }
-    
+
             // Obtener datos del cliente
             const response = await axios.get(`https://prestamos-back-production.up.railway.app/estadisticas/cliente/${cliente.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-    
+
             const data = response.data;
-    
+
             // Formatear los datos para el archivo Excel
             const formattedData = [{
                 'No.': 1,  // Si es un solo cliente, el número es fijo.
@@ -144,25 +156,31 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 'Direccion': data.direccion,
                 'Telefono': data.telefono,
                 'Monto': data.monto_inicial,
-                'Esquema de Dias-%': `${data.dias_prestamo === 15 ? `15 días $85x1000 30%` : data.dias_prestamo === 20 ? `20 días $65x1000 30%` : data.esquema_dias}`,
-                'Fecha de inicio del prestamo': new Date(data.fecha_inicio).toLocaleDateString('es-ES', {
-                    day: '2-digit', month: 'long', year: 'numeric'
-                }),
-                'Fecha de termino': new Date(data.fecha_termino).toLocaleDateString('es-ES', {
-                    day: '2-digit', month: 'long', year: 'numeric'
-                }),
+                'Esquema de Dias-%': `${(data.dias_prestamo === 15 || data.dias_prestamo === 16) ?
+                    `15 días $85x1000 30%` :
+                    (data.dias_prestamo === 20 || data.dias_prestamo === 21) ?
+                        `20 días $65x1000 30%` :
+                        data.esquema_dias}`,
+                // 'Fecha de inicio del prestamo': new Date(data.fecha_inicio).toLocaleDateString('es-ES', {
+                //     day: '2-digit', month: 'long', year: 'numeric'
+                // }),
+                // 'Fecha de termino': new Date(data.fecha_termino).toLocaleDateString('es-ES', {
+                //     day: '2-digit', month: 'long', year: 'numeric'
+                // }),
+                'Fecha de inicio del prestamo': dayjs(data.fecha_inicio).tz('America/Mexico_City').locale('es').format('DD MMMM YYYY'),
+                'Fecha de termino': dayjs(data.fecha_termino).tz('America/Mexico_City').locale('es').format('DD MMMM YYYY'),
                 'Observaciones': data.ocupacion
             }];
-    
+
             const ws = XLSX.utils.json_to_sheet(formattedData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Estadísticas");
-    
+
             // Crear el nombre del archivo con el nombre del cliente
             const fileName = `estadisticas_cliente_${cliente.nombre.replace(/ /g, '_')}.xlsx`;
-    
+
             const wbout = XLSX.write(wb, { type: 'binary', bookType: "xlsx" });
-    
+
             const s2ab = (s) => {
                 const buf = new ArrayBuffer(s.length);
                 const view = new Uint8Array(buf);
@@ -171,7 +189,7 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 }
                 return buf;
             };
-    
+
             const bufferToBase64 = (buffer) => {
                 let binary = '';
                 const bytes = new Uint8Array(buffer);
@@ -181,10 +199,10 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 }
                 return btoa(binary);
             };
-    
+
             const uri = FileSystem.cacheDirectory + fileName;
             await FileSystem.writeAsStringAsync(uri, bufferToBase64(s2ab(wbout)), { encoding: FileSystem.EncodingType.Base64 });
-    
+
             if (await Sharing.isAvailableAsync()) {
                 await Sharing.shareAsync(uri);
             } else {
@@ -194,9 +212,9 @@ const TrabajadorClientes = ({ route, navigation }) => {
             console.error('Error exportando estadísticas:', error);
         }
     };
-    
-    
-    
+
+
+
 
     return (
         <View contentContainerStyle={styles.container} style={styles.container}>
@@ -212,10 +230,10 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => (
                     <>
-                        <ClienteCard 
-                            cliente={item} 
-                            onPress={() => navigation.navigate('ClienteDetails', { id: item.id })} 
-                            isAdmin={isAdmin} 
+                        <ClienteCard
+                            cliente={item}
+                            onPress={() => navigation.navigate('ClienteDetails', { id: item.id })}
+                            isAdmin={isAdmin}
                             onEdit={() => handleEdit(item)}
                             onDelete={handleDelete}
                             onExport={() => handleExport(item)}
@@ -236,8 +254,13 @@ const TrabajadorClientes = ({ route, navigation }) => {
                 <EliminarClientes
                     cliente={clienteSeleccionado}
                     visible={eliminarVisible}
-                    onClose={() => setEliminarVisible(false)}
+                    onClose={() => {
+                        setEliminarVisible(false);
+                        setDeleteMessage('');
+                    }}
                     onEliminar={handleEliminar}
+                    loading={loading}
+                    deleteMessage={deleteMessage}
                 />
             )}
         </View>

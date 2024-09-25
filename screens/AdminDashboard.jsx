@@ -3,6 +3,7 @@ import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'r
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TrabajadorCard from '../components/TrabajadorCard';
+import { Ionicons } from '@expo/vector-icons';
 
 const AdminDashboard = ({ navigation }) => {
     const [trabajadores, setTrabajadores] = useState([]);
@@ -42,15 +43,15 @@ const AdminDashboard = ({ navigation }) => {
         });
     };
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation]);
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //         headerRight: () => (
+    //             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+    //                 <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+    //             </TouchableOpacity>
+    //         ),
+    //     });
+    // }, [navigation]);
 
     const handleSearch = (text) => {
         setSearchText(text);
@@ -66,7 +67,11 @@ const AdminDashboard = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Lista de trabajadores</Text>
+            <View style={styles.headerContainer}>
+                <Text style={styles.title}>Lista de trabajadores</Text>
+                <Ionicons name={'exit'} size={40} color={"#c55052"} onPress={handleLogout}/>
+            </View>
+
             <TextInput
                 style={styles.searchInput}
                 placeholder="Buscar por nombre"
@@ -89,6 +94,12 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: '#1c1c1e', // Fondo oscuro
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'stretch',
+        marginBottom: 10,
     },
     title: {
         fontSize: 24,

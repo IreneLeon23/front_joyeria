@@ -4,6 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import ClienteCard from '../components/ClienteCard';
+import { Ionicons } from '@expo/vector-icons';
 
 const WorkerDashboard = ({ navigation }) => {
     const [clientes, setClientes] = useState([]);
@@ -61,19 +62,22 @@ const WorkerDashboard = ({ navigation }) => {
         });
     };
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation]);
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //         headerRight: () => (
+    //             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+    //                 <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+    //             </TouchableOpacity>
+    //         ),
+    //     });
+    // }, [navigation]);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Lista de clientes</Text>
+            <View style={styles.headerContainer}>
+                <Text style={styles.title}>Lista de clientes</Text>
+                <Ionicons name={'exit'} size={40} color={"#c55052"} onPress={handleLogout}/>
+            </View>
             <TextInput
                 style={styles.searchInput}
                 placeholder="Buscar cliente por nombre"
@@ -102,7 +106,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#1c1c1e',
-        padding: 10,
+        padding: 20,
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'stretch',
+        marginBottom: 10,
     },
     title: {
         fontSize: 24,

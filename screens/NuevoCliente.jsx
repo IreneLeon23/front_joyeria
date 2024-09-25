@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const NuevoCliente = ({ navigation }) => {
     const [nombre, setNombre] = useState('');
@@ -14,6 +20,7 @@ const NuevoCliente = ({ navigation }) => {
     const [token, setToken] = useState(null);
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const getToken = async () => {
@@ -24,8 +31,8 @@ const NuevoCliente = ({ navigation }) => {
         getToken();
 
         // Set the array to start from the next day
-        const fechaInicio = new Date();
-        fechaInicio.setDate(fechaInicio.getDate());
+        const fechaInicio = dayjs().startOf('day').add(1, 'day');
+        fechaInicio.format();
 
         setItems([
             { label: 'Seleccionar fecha', value: '' },
@@ -35,6 +42,8 @@ const NuevoCliente = ({ navigation }) => {
     }, []);
 
     const handleAddCliente = async () => {
+        setIsLoading(true);
+
         if (!token) {
             console.error('No token found');
             Alert.alert('Error', 'No se encontró un token de autenticación');
@@ -42,23 +51,30 @@ const NuevoCliente = ({ navigation }) => {
         }
 
         // Nueva fecha de inicio
-        const fechaInicio = new Date();
-        fechaInicio.setHours(0, 0, 0, 0); // Establece a medianoche
+        const fechaInicio = dayjs().startOf('day');
+
+        // const fechaInicio = new Date();
+        // fechaInicio.setHours(0, 0, 0, 0); // Establece a medianoche
 
         let newFechaTermino;
         if (fechaTermino === '15 días') {
-            newFechaTermino = new Date(fechaInicio);
-            newFechaTermino.setDate(newFechaTermino.getDate() + 15); // Agrega 15 días
+            // newFechaTermino = new Date(fechaInicio);
+            // newFechaTermino.setDate(newFechaTermino.getDate() + 15); // Agrega 15 días
+            newFechaTermino = fechaInicio.add(15, 'day');
         } else if (fechaTermino === '20 días') {
-            newFechaTermino = new Date(fechaInicio);
-            newFechaTermino.setDate(newFechaTermino.getDate() + 20); // Agrega 20 días
+            // newFechaTermino = new Date(fechaInicio);
+            // newFechaTermino.setDate(newFechaTermino.getDate() + 20); // Agrega 20 días
+            newFechaTermino = fechaInicio.add(20, 'day');
         }
 
-        // Verifica que el día de la nueva fecha no tenga horas adicionales
-        newFechaTermino.setHours(0, 0, 0, 0);
+        const formattedFechaInicio = fechaInicio.format('YYYY-MM-DD');
+        const formattedFechaTermino = newFechaTermino.format('YYYY-MM-DD');
 
-        const formattedFechaInicio = fechaInicio.toISOString().split('T')[0];
-        const formattedFechaTermino = newFechaTermino.toISOString().split('T')[0];
+        // // Verifica que el día de la nueva fecha no tenga horas adicionales
+        // newFechaTermino.setHours(0, 0, 0, 0);
+
+        // const formattedFechaInicio = fechaInicio.toISOString().split('T')[0];
+        // const formattedFechaTermino = newFechaTermino.toISOString().split('T')[0];
         try {
             await axios.post('https://prestamos-back-production.up.railway.app/clientes', {
                 nombre,
@@ -87,11 +103,14 @@ const NuevoCliente = ({ navigation }) => {
         } catch (error) {
             console.error('Error al agregar cliente:', error);
             Alert.alert('Error', 'Hubo un error al agregar el cliente');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
+            <Text style={styles.title}>Agregar nuevo cliente</Text>
             <Text style={styles.label}>Nombre:</Text>
             <TextInput
                 style={styles.input}
@@ -149,13 +168,18 @@ const NuevoCliente = ({ navigation }) => {
                 keyboardType="numeric"
             />
             <View style={styles.buttonContainer}>
-                <Button
-                    title="Agregar Cliente"
-                    onPress={handleAddCliente}
-                    color="#28A745"
-                />
+                {isLoading ? (
+                    <ActivityIndicator size="large" color="#28A745" />
+                ) : (
+                    <Button
+                        title="Agregar Cliente"
+                        onPress={handleAddCliente}
+                        color="#28A745"
+                        disabled={isLoading}
+                    />
+                )}
             </View>
-        </View>
+        </ScrollView>
     );
 };
 
@@ -164,6 +188,13 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         backgroundColor: '#1c1c1e',
+    },
+    title: {
+        fontSize: 24,
+        color: '#fff',
+        marginBottom: 20,
+        textAlign: 'center',
+        fontWeight: "bold"
     },
     label: {
         fontSize: 16,
