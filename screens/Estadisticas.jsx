@@ -15,16 +15,14 @@ const EstadisticasScreen = () => {
         try {
             const token = await AsyncStorage.getItem('token');
             if (!token) throw new Error('No token found');
-            
+
             const response = await axios.get('https://prestamos-back-production.up.railway.app/estadisticas/general', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
             console.log('Datos recibidos:', response.data);
             setEstadisticas(response.data);
         } catch (error) {
             console.error('Error al cargar estadísticas:', error.message);
-            console.error('Detalles del error:', error);
         } finally {
             setLoading(false);
         }
@@ -37,7 +35,7 @@ const EstadisticasScreen = () => {
     if (loading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="#007BFF" />
+                <ActivityIndicator size="large" color="#d1a980" />
             </View>
         );
     }
@@ -54,20 +52,17 @@ const EstadisticasScreen = () => {
                 <Text style={styles.cardValue}>{totalClientes}</Text>
             </View>
             <View style={styles.card}>
-                <Text style={styles.cardTitle}>Total Préstamos Activos</Text>
+                <Text style={styles.cardTitle}>Total Clientes Activos</Text>
                 <Text style={styles.cardValue}>{totalPrestamosActivos}</Text>
             </View>
             <View style={styles.card}>
-                <Text style={styles.cardTitle}>Total Préstamos Completados</Text>
+                <Text style={styles.cardTitle}>Total Ventas Completadas</Text>
                 <Text style={styles.cardValue}>{totalPrestamosCompletados}</Text>
             </View>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EstadisticasTablas')}>
                     <Image source={require('../assets/table_icon.png')} style={styles.icon} />
                 </TouchableOpacity>
-                {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EstadisticasGraficas', { estadisticas })}>
-                    <Image source={require('../assets/chart_icon.png')} style={styles.icon} />
-                </TouchableOpacity> */}
             </View>
         </View>
     );
@@ -75,12 +70,27 @@ const EstadisticasScreen = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 16, backgroundColor: '#1e1e1e' },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center', color: "white" },
-    card: { backgroundColor: '#f8f9fa', borderRadius: 8, padding: 16, marginVertical: 8 },
-    cardTitle: { fontSize: 18, fontWeight: 'bold' },
-    cardValue: { fontSize: 16 },
+    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center', color: '#d1a980' },
+    card: {
+        backgroundColor: '#363f30',
+        borderRadius: 8,
+        padding: 16,
+        marginVertical: 8,
+        borderWidth: 1,
+        borderColor: '#748873'
+    },
+    cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#d1a980' },
+    cardValue: { fontSize: 16, color: 'white' },
     buttonContainer: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 },
-    button: { width: 150, height: 150, justifyContent: 'center', alignItems: 'center', borderRadius: 8, backgroundColor: '#007BFF', padding: 16 },
+    button: {
+        width: 150,
+        height: 150,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 8,
+        backgroundColor: '#a87a53',
+        padding: 16
+    },
     icon: { width: '100%', height: '100%', resizeMode: 'contain' }
 });
 

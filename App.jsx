@@ -16,9 +16,6 @@ import EliminarTrabajador from './components/EliminarTrabajador';
 import EditarClientes from './components/EditarClientes';
 import EstadisticasGraficas from './components/EstadisticasGraficas';
 import EstadisticasTablas from './components/EstadisticasTablas';
-// import { Amplify } from 'aws-amplify';
-// import amplifyconfig from './src/amplifyconfiguration.json';
-// Amplify.configure(amplifyconfig);
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -36,16 +33,16 @@ function WorkerTabs() {
                     }
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: 'yellow',
-                tabBarInactiveTintColor: '#ccc',
+                tabBarActiveTintColor: '#d1a980',  // Gold for active icons
+                tabBarInactiveTintColor: '#748873',  // Olive green for inactive icons
                 tabBarStyle: {
-                    backgroundColor: '#1c1c1e',
+                    backgroundColor: '#1c1c1e',  // Dark green background
                     height: 60,
                 },
             })}
         >
-            <Tab.Screen name="Inicio" component={WorkerDashboard} options={{ headerShown: false }}/>
-            <Tab.Screen name="Agregar Cliente" component={NuevoCliente} options={{ headerShown: false }}/>
+            <Tab.Screen name="Inicio" component={WorkerDashboard} options={{ headerShown: false }} />
+            <Tab.Screen name="Agregar Cliente" component={NuevoCliente} options={{ headerShown: false }} />
         </Tab.Navigator>
     );
 }
@@ -65,17 +62,17 @@ function AdminTabs() {
                     }
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: 'yellow',
-                tabBarInactiveTintColor: '#ccc',
+                tabBarActiveTintColor: '#d1a980',  // Gold for active icons
+                tabBarInactiveTintColor: '#748873',  // Olive green for inactive icons
                 tabBarStyle: {
-                    backgroundColor: '#1c1c1e',
+                    backgroundColor: '#1c1c1e',  // Dark green background
                     height: 60,
                 },
             })}
         >
-            <Tab.Screen name="Inicio" component={AdminDashboard} options={{ headerShown: false }}/>
-            <Tab.Screen name="Agregar Trabajador" component={NuevoTrabajador} options={{ headerShown: false }}/>
-            <Tab.Screen name="Estadisticas" component={EstadisticasScreen} options={{ headerShown: false }}/>
+            <Tab.Screen name="Inicio" component={AdminDashboard} options={{ headerShown: false }} />
+            <Tab.Screen name="Agregar Trabajador" component={NuevoTrabajador} options={{ headerShown: false }} />
+            <Tab.Screen name="Estadisticas" component={EstadisticasScreen} options={{ headerShown: false }} />
         </Tab.Navigator>
     );
 }
@@ -124,8 +121,16 @@ export default function App() {
                     component={EditarClientes} 
                     options={{ headerShown: true }} 
                 />
-                <Stack.Screen name="EstadisticasTablas" component={EstadisticasTablas} options={{ title: 'Estadísticas en Tablas' }} />
-                <Stack.Screen name="EstadisticasGraficas" component={EstadisticasGraficas} options={{ title: 'Estadísticas en Gráficas' }} />
+                <Stack.Screen 
+                    name="EstadisticasTablas" 
+                    component={EstadisticasTablas} 
+                    options={{ title: 'Estadísticas en Tablas' }} 
+                />
+                <Stack.Screen 
+                    name="EstadisticasGraficas" 
+                    component={EstadisticasGraficas} 
+                    options={{ title: 'Estadísticas en Gráficas' }} 
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );

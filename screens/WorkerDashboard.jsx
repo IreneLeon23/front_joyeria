@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, FlatList, StyleSheet, TextInput, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, StyleSheet, TextInput, Text } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
@@ -33,7 +33,6 @@ const WorkerDashboard = ({ navigation }) => {
                     ))
                 );
 
-                console.log('Clientes recibidos:', uniqueClientes);
                 setClientes(uniqueClientes);
                 setFilteredClientes(uniqueClientes);
             } catch (error) {
@@ -62,28 +61,18 @@ const WorkerDashboard = ({ navigation }) => {
         });
     };
 
-    // useLayoutEffect(() => {
-    //     navigation.setOptions({
-    //         headerRight: () => (
-    //             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-    //                 <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
-    //             </TouchableOpacity>
-    //         ),
-    //     });
-    // }, [navigation]);
-
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
                 <Text style={styles.title}>Lista de clientes</Text>
-                <Ionicons name={'exit'} size={40} color={"#c55052"} onPress={handleLogout}/>
+                <Ionicons name={'exit'} size={40} color={"#a87a53"} onPress={handleLogout} />
             </View>
             <TextInput
                 style={styles.searchInput}
                 placeholder="Buscar cliente por nombre"
                 value={searchText}
                 onChangeText={setSearchText}
-                placeholderTextColor="#aaa"
+                placeholderTextColor="#d1a980"
             />
             <FlatList
                 data={filteredClientes}
@@ -105,41 +94,30 @@ const WorkerDashboard = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#1c1c1e',
+        backgroundColor: '#000', // Fondo negro
         padding: 20,
     },
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'stretch',
+        alignItems: 'center',
         marginBottom: 10,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#d1a980', // Texto dorado
         marginBottom: 10,
     },
     searchInput: {
         height: 40,
-        borderColor: '#555',
+        borderColor: '#748873', // Verde oliva
         borderWidth: 1,
         paddingHorizontal: 8,
         borderRadius: 4,
-        color: '#fff',
+        color: '#d1a980', // Texto dorado
         marginBottom: 10,
-        backgroundColor: '#fff',
-    },
-    logoutButton: {
-        marginRight: 15,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        backgroundColor: '#2e5c74', // Color de fondo
-        borderRadius: 5,
-    },
-    logoutButtonText: {
-        color: '#fff', // Color del texto
-        fontWeight: 'bold',
+        backgroundColor: '#1c1c1e', // Fondo más oscuro
     },
 });
 

@@ -4,7 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc'
+import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
@@ -52,29 +52,16 @@ const NuevoCliente = ({ navigation }) => {
 
         // Nueva fecha de inicio
         const fechaInicio = dayjs().startOf('day');
-
-        // const fechaInicio = new Date();
-        // fechaInicio.setHours(0, 0, 0, 0); // Establece a medianoche
-
         let newFechaTermino;
         if (fechaTermino === '15 días') {
-            // newFechaTermino = new Date(fechaInicio);
-            // newFechaTermino.setDate(newFechaTermino.getDate() + 15); // Agrega 15 días
             newFechaTermino = fechaInicio.add(15, 'day');
         } else if (fechaTermino === '20 días') {
-            // newFechaTermino = new Date(fechaInicio);
-            // newFechaTermino.setDate(newFechaTermino.getDate() + 20); // Agrega 20 días
             newFechaTermino = fechaInicio.add(20, 'day');
         }
 
         const formattedFechaInicio = fechaInicio.format('YYYY-MM-DD');
         const formattedFechaTermino = newFechaTermino.format('YYYY-MM-DD');
 
-        // // Verifica que el día de la nueva fecha no tenga horas adicionales
-        // newFechaTermino.setHours(0, 0, 0, 0);
-
-        // const formattedFechaInicio = fechaInicio.toISOString().split('T')[0];
-        // const formattedFechaTermino = newFechaTermino.toISOString().split('T')[0];
         try {
             await axios.post('https://prestamos-back-production.up.railway.app/clientes', {
                 nombre,
@@ -90,15 +77,12 @@ const NuevoCliente = ({ navigation }) => {
                 }
             });
 
-            // Limpiar los campos después de agregar el cliente
             setNombre('');
             setOcupacion('');
             setDireccion('');
             setTelefono('');
             setFechaTermino('');
             setMontoInicial('');
-
-            // Mostrar alerta de éxito
             Alert.alert('Éxito', 'Cliente agregado exitosamente');
         } catch (error) {
             console.error('Error al agregar cliente:', error);
@@ -174,7 +158,7 @@ const NuevoCliente = ({ navigation }) => {
                     <Button
                         title="Agregar Cliente"
                         onPress={handleAddCliente}
-                        color="#28A745"
+                        color="#a87a53"  // Color cobre para el botón
                         disabled={isLoading}
                     />
                 )}
@@ -187,45 +171,38 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: '#1c1c1e',
+        backgroundColor: '#000000', // Fondo negro
     },
     title: {
         fontSize: 24,
-        color: '#fff',
+        color: '#d1a980', // Texto dorado
         marginBottom: 20,
         textAlign: 'center',
-        fontWeight: "bold"
+        fontWeight: "bold",
     },
     label: {
         fontSize: 16,
-        marginBottom: 4,
-        color: '#fff',
+        color: '#d1a980', // Texto dorado
+        marginBottom: 8,
     },
     input: {
-        height: 50,
-        borderColor: '#ccc',
         borderWidth: 1,
-        marginBottom: 12,
-        paddingHorizontal: 8,
-        borderRadius: 4,
-        backgroundColor: '#fff',
-        color: '#000',
-    },
-    buttonContainer: {
-        width: 200,
-        marginTop: 12,
-        margin: 'auto',
-
+        borderColor: '#748873', // Borde verde oliva
+        padding: 10,
+        marginBottom: 20,
+        color: '#fff',
+        backgroundColor: '#1c1c1e', // Fondo oscuro para el input
     },
     dropdown: {
-        backgroundColor: '#fff',
-        borderColor: '#ccc',
-        marginBottom: 12,
+        borderColor: '#748873', // Borde verde oliva
+        backgroundColor: '#1c1c1e', // Fondo oscuro
     },
     dropdownContainer: {
-        backgroundColor: '#fff',
-        borderColor: '#ccc',
-    }
+        backgroundColor: '#363f30', // Fondo verde oscuro para la lista desplegable
+    },
+    buttonContainer: {
+        marginTop: 20,
+    },
 });
 
 export default NuevoCliente;

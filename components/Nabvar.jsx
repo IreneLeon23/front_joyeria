@@ -7,12 +7,12 @@ const Navbar = ({ navigation }) => {
             <Button
                 title="Inicio"
                 onPress={() => navigation.navigate('WorkerDashboard')}
-                color="#2e5c74"
+                color="#a87a53"  // Copper color for buttons
             />
             <Button
                 title="Agregar Cliente"
                 onPress={() => navigation.navigate('NuevoCliente')}
-                color="#2e5c74"
+                color="#a87a53"  // Copper color for buttons
             />
         </View>
     );
@@ -22,8 +22,8 @@ const styles = StyleSheet.create({
     navbar: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        backgroundColor: '#fff',
-        borderColor: '#ccc',
+        backgroundColor: '#1e1e1e', // Black background to match the theme
+        borderColor: '#748873',     // Olive green border
         borderWidth: 1,
         borderRadius: 8,
         padding: 10,

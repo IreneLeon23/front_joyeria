@@ -17,18 +17,15 @@ const NuevoTrabajador = ({ navigation }) => {
             const token = await AsyncStorage.getItem('token');
             setToken(token);
         };
-
         getToken();
     }, []);
 
     const handleAddTrabajador = async () => {
         setIsLoading(true);
-
         if (!token) {
             console.error('No token found');
             return;
         }
-
         try {
             const response = await axios.post('https://prestamos-back-production.up.railway.app/trabajadores', {
                 nombre,
@@ -57,6 +54,7 @@ const NuevoTrabajador = ({ navigation }) => {
                 <TextInput
                     style={styles.input}
                     placeholder="Ingrese el nombre"
+                    placeholderTextColor="#748873"  // Verde oliva para el placeholder
                     value={nombre}
                     onChangeText={setNombre}
                 />
@@ -66,6 +64,7 @@ const NuevoTrabajador = ({ navigation }) => {
                 <TextInput
                     style={styles.input}
                     placeholder="Ingrese el email"
+                    placeholderTextColor="#748873"  // Verde oliva para el placeholder
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -76,6 +75,7 @@ const NuevoTrabajador = ({ navigation }) => {
                 <TextInput
                     style={styles.input}
                     placeholder="Ingrese la contraseña"
+                    placeholderTextColor="#748873"  // Verde oliva para el placeholder
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
@@ -94,7 +94,7 @@ const NuevoTrabajador = ({ navigation }) => {
             </View>
             <TouchableOpacity style={styles.addButton} onPress={handleAddTrabajador} disabled={isLoading}>
                 {isLoading ? (
-                    <ActivityIndicator size="large" color="#28A745" />
+                    <ActivityIndicator size="large" color="#d1a980" />  // Dorado para el indicador de carga
                 ) : (
                     <Text style={styles.addButtonText}>Agregar Trabajador</Text>
                 )}
@@ -107,12 +107,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: '#1c1c1e',
-        // justifyContent: 'center',
+        backgroundColor: '#1c1c1e', // Fondo oscuro
     },
     header: {
         fontSize: 24,
-        color: '#fff',
+        color: '#d1a980', // Dorado para el título
         marginBottom: 20,
         textAlign: 'center',
         fontWeight: "bold"
@@ -123,29 +122,28 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         marginBottom: 5,
-        color: '#fff',
+        color: '#d1a980', // Dorado para las etiquetas
     },
     input: {
         height: 40,
-        borderColor: '#fff',
+        borderColor: '#748873', // Verde oliva para los bordes
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 10,
         borderRadius: 5,
-        backgroundColor: '#fff',
-        color: '#000',
+        backgroundColor: '#1c1c1e',
+        color: '#fff', // Texto blanco
     },
     picker: {
         height: 50,
         width: '100%',
         marginBottom: 12,
-        backgroundColor: '#fff',
-        color: '#000',
+        backgroundColor: '#1c1c1e',
+        color: '#fff', // Texto blanco
     },
     addButton: {
-        backgroundColor: '#28A745',
+        backgroundColor: '#a87a53', // Cobre para el botón destacado
         padding: 15,
-        width: 200,
         margin: 'auto',
         borderRadius: 5,
         alignItems: 'center',

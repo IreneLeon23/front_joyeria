@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -9,41 +8,37 @@ const LoginScreen = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [hidePass, setHidePass] = useState(true);
     const [alertMessage, setAlertMessage] = useState(null);
-    const [alertType, setAlertType] = useState(''); // 'success' or 'error'
+    const [alertType, setAlertType] = useState(''); // 'success' o 'error'
 
-    const decodeJWT = (token) => {
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            return JSON.parse(jsonPayload);
-        } catch (error) {
-            console.error('Error al decodificar el JWT:', error);
-            return null;
+    const predefinedUsers = {
+        admin: {
+            email: 'admin@example.com',
+            password: 'admin123',
+            role: 'admin'
+        },
+        worker: {
+            email: 'worker@example.com',
+            password: 'worker123',
+            role: 'worker'
         }
     };
 
     const handleLogin = async () => {
-        try {
-            console.log('Iniciando sesión con:', { email, password });
-            const response = await axios.post('https://prestamos-back-production.up.railway.app/login', { email, password });
-            const { token } = response.data;
-            console.log('Token recibido:', token);
+        let user = null;
+        if (email === predefinedUsers.admin.email && password === predefinedUsers.admin.password) {
+            user = predefinedUsers.admin;
+        } else if (email === predefinedUsers.worker.email && password === predefinedUsers.worker.password) {
+            user = predefinedUsers.worker;
+        }
 
-            await AsyncStorage.setItem('token', token);
-
-            const decoded = decodeJWT(token);
-            console.log('Token decodificado:', decoded);
-
+        if (user) {
+            await AsyncStorage.setItem('userRole', user.role);
             setAlertMessage('Inicio de sesión exitoso');
             setAlertType('success');
 
             setTimeout(() => {
                 setAlertMessage(null);
-                if (decoded && decoded.role === 'admin') {
+                if (user.role === 'admin') {
                     navigation.reset({
                         index: 0,
                         routes: [{ name: 'AdminDashboard' }],
@@ -55,9 +50,8 @@ const LoginScreen = ({ navigation }) => {
                     });
                 }
             }, 2000);
-        } catch (error) {
-            console.error('Error al iniciar sesión:', error);
-            setAlertMessage('Error al iniciar sesión');
+        } else {
+            setAlertMessage('Correo o contraseña incorrectos');
             setAlertType('error');
             setTimeout(() => setAlertMessage(null), 3000);
         }
@@ -67,9 +61,10 @@ const LoginScreen = ({ navigation }) => {
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
             <View style={styles.headerContainer}>
-                <Text style={styles.headerText}>PRESTAMOS DIARIOS</Text>
+                <Text style={styles.title}>Joyería</Text>
+                <Text style={styles.subtitle}>López</Text>
             </View>
-            <View style={styles.formContainer}>
+            <View style={styles.loginBox}>
                 {alertMessage && (
                     <View style={alertType === 'success' ? styles.successAlert : styles.errorAlert}>
                         <Text style={styles.alertText}>{alertMessage}</Text>
@@ -99,7 +94,7 @@ const LoginScreen = ({ navigation }) => {
                         style={styles.icon}
                         onPress={() => setHidePass(!hidePass)}
                     >
-                        <Ionicons name={hidePass ? "eye-off" : "eye"} size={20} color="gray" />
+                        <Ionicons name={hidePass ? "eye-off" : "eye"} size={20} color="#ccc" />
                     </TouchableOpacity>
                 </View>
                 <View style={styles.buttonContainer}>
@@ -115,48 +110,57 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#1a1a1a',
+        backgroundColor: '#000', // Fondo negro
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     headerContainer: {
-        backgroundColor: '#2e5c74',
-        width: '100%',
         alignItems: 'center',
-        paddingVertical: 15,
-        marginTop: StatusBar.currentHeight || 20, // Agrega margen para evitar la barra de estado
+        marginBottom: 40,
     },
-    headerText: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        color: '#fff',
+    title: {
+        fontSize: 48,
+        fontStyle: 'italic',
+        color: '#a87a53', // Cobre
     },
-    formContainer: {
-        flex: 1,
+    subtitle: {
+        fontSize: 36,
+        fontStyle: 'italic',
+        color: '#a87a53', // Cobre
+    },
+    loginBox: {
+        width: '85%',
+        backgroundColor: '#363f30', // Verde oscuro
+        borderRadius: 10,
+        padding: 20,
         alignItems: 'center',
-        justifyContent: 'center',
-        width: '90%',
-        alignSelf: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 4 },
     },
     text: {
-        color: '#fff',
+        color: '#d1a980', // Dorado
         fontSize: 16,
         fontWeight: 'bold',
+        marginVertical: 10,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderColor: '#2e5c74',
+        borderColor: '#d1a980', // Dorado
         borderWidth: 1,
         borderRadius: 8,
         marginTop: 10,
         width: '100%',
         padding: 5,
-        backgroundColor: '#fff',
+        backgroundColor: '#748873', // Verde oliva
     },
     input: {
         flex: 1,
         height: 40,
         paddingHorizontal: 10,
-        color: '#000',
+        color: '#d1a980', // Dorado
     },
     icon: {
         padding: 10,
@@ -166,13 +170,13 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     loginButton: {
-        backgroundColor: '#2e5c74',
-        padding: 10,
+        backgroundColor: '#a87a53', // Cobre
+        padding: 12,
         borderRadius: 8,
         alignItems: 'center',
     },
     loginButtonText: {
-        color: '#fff',
+        color: '#FFF', // Blanco
         fontWeight: 'bold',
     },
     successAlert: {
@@ -192,7 +196,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     alertText: {
-        color: '#fff',
+        color: '#FFF',
         fontWeight: 'bold',
     },
 });
